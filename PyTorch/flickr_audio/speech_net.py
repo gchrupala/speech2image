@@ -25,11 +25,11 @@ from data_split import split_data_flickr
 parser = argparse.ArgumentParser(description='Create and run an articulatory feature classification DNN')
 
 # args concerning file location
-parser.add_argument('-data_loc', type = str, default = '/prep_data/flickr_features.h5',
+parser.add_argument('-data_loc', type = str, default = '/roaming/gchrupal/datasets/flickr8k/flickr_features.h5',
                     help = 'location of the feature file, default: /prep_data/flickr_features.h5')
-parser.add_argument('-split_loc', type = str, default = '/data/flickr/dataset.json', 
+parser.add_argument('-split_loc', type = str, default = '/roaming/gchrupal/datasets/flickr8k/dataset.json', 
                     help = 'location of the json file containing the data split information')
-parser.add_argument('-results_loc', type = str, default = '/data/speech2image/PyTorch/flickr_audio/results/',
+parser.add_argument('-results_loc', type = str, default = '/roaming/gchrupal/verdigris/speech2image/experiments/a/',
                     help = 'location to save the trained models')
 # args concerning training settings
 parser.add_argument('-batch_size', type = int, default = 32, help = 'batch size, default: 32')
