@@ -54,6 +54,7 @@ out_size = audio_config['rnn']['hidden_size'] * 2**audio_config['rnn']['bidirect
 image_config = {'linear':{'in_size': 2048, 'out_size': out_size}, 'norm': True}
 
 
+
 # open the data file
 data_file = tables.open_file(args.data_loc, mode='r+') 
 
