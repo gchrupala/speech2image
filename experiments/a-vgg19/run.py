@@ -25,7 +25,7 @@ from data_split import split_data_flickr
 parser = argparse.ArgumentParser(description='Create and run an articulatory feature classification DNN')
 
 # args concerning file location
-parser.add_argument('-data_loc', type = str, default = '/roaming/gchrupal/datasets/flickr8k/flickr_features.h5',
+parser.add_argument('-data_loc', type = str, default = '/roaming/gchrupal/datasets/flickr8k/flickr_features-vgg19.h5',
                     help = 'location of the feature file, default: /prep_data/flickr_features.h5')
 parser.add_argument('-split_loc', type = str, default = '/roaming/gchrupal/datasets/flickr8k/dataset.json', 
                     help = 'location of the json file containing the data split information')
@@ -37,7 +37,7 @@ parser.add_argument('-lr', type = float, default = 0.0002, help = 'learning rate
 parser.add_argument('-n_epochs', type = int, default = 32, help = 'number of training epochs, default: 25')
 parser.add_argument('-cuda', type = bool, default = True, help = 'use cuda, default: True')
 # args concerning the database and which features to load
-parser.add_argument('-visual', type = str, default = 'resnet', help = 'name of the node containing the visual features, default: resnet')
+parser.add_argument('-visual', type = str, default = 'vgg19', help = 'name of the node containing the visual features, default: resnet')
 parser.add_argument('-cap', type = str, default = 'mfcc', help = 'name of the node containing the audio features, default: mfcc')
 parser.add_argument('-gradient_clipping', type = bool, default = False, help ='use gradient clipping, default: False')
 
