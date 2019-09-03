@@ -148,6 +148,7 @@ class flickr_trainer():
             # optionally print loss every n batches
             if num_batches%100 == 0:
                 print(self.train_loss.cpu().item()/num_batches)
+                
             # if there is a lr scheduler, take a step in the scheduler. The 'cyclic' scheduler requires 
             # updates every minibatch, this option could also be used for step schedulers.
             if self.scheduler == 'cyclic':

@@ -76,7 +76,8 @@ node_list = output_file.root._f_list_nodes()
     
 # create the visual features for all images 
 if vis: 
-    vis_feats(img_path, output_file, append_name, img_audio, node_list, 'resnet') 
+    vis_feats(img_path, output_file, append_name, img_audio, node_list, 'resnet')
+    #vis_feats(img_path, output_file, append_name, img_audio, node_list, 'vgg19') 
 
 ######### parameter settings for the audio preprocessing ###############
 
