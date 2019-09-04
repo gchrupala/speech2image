@@ -14,7 +14,7 @@ import torch
 import numpy as np
 from torch.optim import lr_scheduler
 import sys
-sys.path.append('../functions')
+sys.path.append('../../PyTorch/functions')
 
 from trainer import flickr_trainer
 from costum_loss import batch_hinge_loss, ordered_loss, attention_loss
@@ -48,7 +48,7 @@ args = parser.parse_args()
 audio_config = {'conv':{'in_channels': 39, 'out_channels': 64, 'kernel_size': 6, 'stride': 2,
                'padding': 0, 'bias': False}, 'rnn':{'input_size': 64, 'hidden_size': 1024, 
                'num_layers': 4, 'batch_first': True, 'bidirectional': True, 'dropout': 0}, 
-               'att':{'in_size': 2048, 'hidden_size': 128, 'heads': 1}}
+               'att':{'in_size': 2048, 'hidden_size': 128, 'heads': 1, 'scalar': True}}
 # automatically adapt the image encoder output size to the size of the caption encoder
 out_size = audio_config['rnn']['hidden_size'] * 2**audio_config['rnn']['bidirectional'] * audio_config['att']['heads']
 image_config = {'linear':{'in_size': 2048, 'out_size': out_size}, 'norm': True}

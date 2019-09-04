@@ -14,7 +14,7 @@ import torch
 import numpy as np
 from torch.optim import lr_scheduler
 import sys
-sys.path.append('../functions')
+sys.path.append('../../PyTorch/functions')
 
 from trainer import flickr_trainer
 from costum_loss import batch_hinge_loss, ordered_loss, attention_loss
@@ -25,7 +25,7 @@ from data_split import split_data_flickr
 parser = argparse.ArgumentParser(description='Create and run an articulatory feature classification DNN')
 
 # args concerning file location
-parser.add_argument('-data_loc', type = str, default = '/roaming/gchrupal/datasets/flickr8k/flickr_features.h5',
+parser.add_argument('-data_loc', type = str, default = '/roaming/gchrupal/datasets/flickr8k/flickr_features-vgg19.h5',
                     help = 'location of the feature file, default: /prep_data/flickr_features.h5')
 parser.add_argument('-split_loc', type = str, default = '/roaming/gchrupal/datasets/flickr8k/dataset.json', 
                     help = 'location of the json file containing the data split information')
@@ -37,7 +37,7 @@ parser.add_argument('-lr', type = float, default = 0.0002, help = 'learning rate
 parser.add_argument('-n_epochs', type = int, default = 32, help = 'number of training epochs, default: 25')
 parser.add_argument('-cuda', type = bool, default = True, help = 'use cuda, default: True')
 # args concerning the database and which features to load
-parser.add_argument('-visual', type = str, default = 'resnet', help = 'name of the node containing the visual features, default: resnet')
+parser.add_argument('-visual', type = str, default = 'vgg19', help = 'name of the node containing the visual features, default: resnet')
 parser.add_argument('-cap', type = str, default = 'mfcc', help = 'name of the node containing the audio features, default: mfcc')
 parser.add_argument('-gradient_clipping', type = bool, default = False, help ='use gradient clipping, default: False')
 
@@ -47,11 +47,11 @@ args = parser.parse_args()
 
 audio_config = {'conv':{'in_channels': 39, 'out_channels': 64, 'kernel_size': 6, 'stride': 2,
                'padding': 0, 'bias': False}, 'rnn':{'input_size': 64, 'hidden_size': 1024, 
-               'num_layers': 4, 'batch_first': True, 'bidirectional': True, 'dropout': 0}, 
-               'att':{'in_size': 2048, 'hidden_size': 128, 'heads': 1}}
+               'num_layers': 4, 'batch_first': True, 'bidirectional': False, 'dropout': 0}, 
+               'att':{'in_size': 1024, 'hidden_size': 128, 'heads': 1, 'scalar': True}}
 # automatically adapt the image encoder output size to the size of the caption encoder
 out_size = audio_config['rnn']['hidden_size'] * 2**audio_config['rnn']['bidirectional'] * audio_config['att']['heads']
-image_config = {'linear':{'in_size': 2048, 'out_size': out_size}, 'norm': True}
+image_config = {'linear':{'in_size': 4096, 'out_size': out_size}, 'norm': True}
 
 
 
@@ -82,7 +82,7 @@ img_net = img_encoder(image_config)
 cap_net = audio_rnn_encoder(audio_config)
 
 # Adam optimiser. I found SGD to work terribly and could not find appropriate parameter settings for it.
-optimizer = torch.optim.Adam(list(img_net.parameters())+list(cap_net.parameters()), 1)
+optimizer = torch.optim.Adam(list(img_net.parameters())+list(cap_net.parameters()), 0.0002)
 
 #plateau_scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, mode = 'min', factor = 0.9, patience = 100, 
 #                                                   threshold = 0.0001, min_lr = 1e-8, cooldown = 100)
@@ -98,13 +98,13 @@ def create_cyclic_scheduler(max_lr, min_lr, stepsize):
     return(cyclic_scheduler)
 
 cyclic_scheduler = create_cyclic_scheduler(max_lr = args.lr, min_lr = 1e-6, stepsize = (int(len(train)/args.batch_size)*5)*4)
-
+const_scheduler = lr_scheduler.LambdaLR(optimizer, lambda _: 1, last_epoch=-1)
 # create a trainer setting the loss function, optimizer, minibatcher, lr_scheduler and the r@n evaluator
 trainer = flickr_trainer(img_net, cap_net, args.visual, args.cap)
 trainer.set_loss(batch_hinge_loss)
 trainer.set_optimizer(optimizer)
 trainer.set_audio_batcher()
-trainer.set_lr_scheduler(cyclic_scheduler, 'cyclic')
+trainer.set_lr_scheduler(const_scheduler, 'const')
 trainer.set_att_loss(attention_loss)
 # optionally use cuda, gradient clipping and pretrained glove vectors
 if cuda:

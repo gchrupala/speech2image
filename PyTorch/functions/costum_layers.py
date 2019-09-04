@@ -71,11 +71,15 @@ class RHN(nn.Module):
         
 # class for making multi headed attenders. 
 class multi_attention(nn.Module):
-    def __init__(self, in_size, hidden_size, n_heads):
+    def __init__(self, in_size, hidden_size, n_heads, scalar=False):
         super(multi_attention, self).__init__()
         self.att_heads = nn.ModuleList()
         for x in range(n_heads):
-            self.att_heads.append(attention(in_size, hidden_size))
+            if scalar:
+                self.att_heads.append(scalar_attention(in_size, hidden_size))
+            else:
+                self.att_heads.append(attention(in_size, hidden_size))
+                
     def forward(self, input):
         out, self.alpha = [], []
         for head in self.att_heads:
@@ -102,7 +106,23 @@ class attention(nn.Module):
         x = torch.sum(self.alpha * input, 1)
         # return the resulting embedding
         return x   
-    
+
+# scalar attention layer for audio encoders
+class scalar_attention(nn.Module):
+    def __init__(self, in_size, hidden_size):
+        super(scalar_attention, self).__init__()
+        self.hidden = nn.Linear(in_size, hidden_size)
+        nn.init.orthogonal(self.hidden.weight.data)
+        self.out = nn.Linear(hidden_size, 1)
+        nn.init.orthogonal(self.hidden.weight.data)
+        self.softmax = nn.Softmax(dim = 1)
+    def forward(self, input):
+        # calculate the attention weights
+        self.alpha = self.softmax(self.out(nn.functional.tanh(self.hidden(input))))
+        # apply the weights to the input and sum over all timesteps
+        x = torch.sum(self.alpha.expand_as(input) * input, 1)
+        # return the resulting embedding
+        return x       
 ################################ Transformer Layers ###########################
 # the transformers consist of an encoder and a decoder, which can also be instantiated
 # and used seperately (e.g. in next word prediction). Both consist of blocks of attention layers

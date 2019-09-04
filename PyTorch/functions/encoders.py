@@ -58,7 +58,7 @@ class audio_rnn_encoder(nn.Module):
         self.RNN = nn.GRU(input_size = rnn['input_size'], hidden_size = rnn['hidden_size'], 
                           num_layers = rnn['num_layers'], batch_first = rnn['batch_first'],
                           bidirectional = rnn['bidirectional'], dropout = rnn['dropout'])
-        self.att = multi_attention(in_size = att['in_size'], hidden_size = att['hidden_size'], n_heads = att['heads'])
+        self.att = multi_attention(in_size = att['in_size'], hidden_size = att['hidden_size'], n_heads = att['heads'], scalar=att['scalar'])
         
     def forward(self, input, l):
         x = self.Conv(input)
